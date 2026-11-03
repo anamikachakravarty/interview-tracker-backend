@@ -9,14 +9,18 @@ from .models import (
     LearningTopic,
     LearningModule,
     LearningMilestone,
-    LearningResource
+    LearningResource,
+    LearningNote,
+    LearningRevision
 )
 
 from .serializers import (
     LearningTopicSerializer,
     LearningModuleSerializer,
     LearningMilestoneSerializer,
-    LearningResourceSerializer
+    LearningResourceSerializer,
+    LearningNoteSerializer,
+    LearningRevisionSerializer
 )
 
 
@@ -317,3 +321,140 @@ class LearningResourceDetailView(APIView):
         resource = get_object_or_404(LearningResource, pk=pk)
         resource.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class LearningNoteListCreateView(APIView):
+
+    def get(self, request, topic_id):
+        topic = get_object_or_404(LearningTopic, pk=topic_id)
+
+        try:
+            note = topic.notes
+        except LearningNote.DoesNotExist:
+            return Response(
+                {"detail": "No notes found for this topic."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = LearningNoteSerializer(note)
+        return Response(serializer.data)
+
+    def post(self, request, topic_id):
+        topic = get_object_or_404(LearningTopic, pk=topic_id)
+
+        if LearningNote.objects.filter(topic=topic).exists():
+            return Response(
+                {"detail": "Notes already exist for this topic. Update them instead."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = LearningNoteSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(topic=topic)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LearningNoteDetailView(APIView):
+
+    def get_object(self, pk):
+        return get_object_or_404(LearningNote, pk=pk)
+
+    def get(self, request, pk):
+        note = self.get_object(pk)
+        serializer = LearningNoteSerializer(note)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        note = self.get_object(pk)
+        serializer = LearningNoteSerializer(note, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        note = self.get_object(pk)
+        serializer = LearningNoteSerializer(
+            note, data=request.data, partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        note = self.get_object(pk)
+        note.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class LearningRevisionListCreateView(APIView):
+
+    def get(self, request, milestone_id):
+        milestone = get_object_or_404(
+            LearningMilestone, pk=milestone_id
+        )
+
+        revisions = milestone.revisions.all()
+        serializer = LearningRevisionSerializer(revisions, many=True)
+
+        return Response(serializer.data)
+
+    def post(self, request, milestone_id):
+        milestone = get_object_or_404(
+            LearningMilestone, pk=milestone_id
+        )
+
+        serializer = LearningRevisionSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(milestone=milestone)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LearningRevisionDetailView(APIView):
+
+    def get_object(self, pk):
+        return get_object_or_404(LearningRevision, pk=pk)
+
+    def get(self, request, pk):
+        revision = self.get_object(pk)
+        serializer = LearningRevisionSerializer(revision)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        revision = self.get_object(pk)
+        serializer = LearningRevisionSerializer(
+            revision, data=request.data
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        revision = self.get_object(pk)
+        serializer = LearningRevisionSerializer(
+            revision, data=request.data, partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        revision = self.get_object(pk)
+        revision.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    

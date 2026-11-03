@@ -9,7 +9,11 @@ from .views import (
     LearningMilestoneListCreateView,
     LearningMilestoneDetailView,
     LearningResourceListCreateView,
-    LearningResourceDetailView
+    LearningResourceDetailView,
+    LearningNoteListCreateView,
+    LearningNoteDetailView,
+    LearningRevisionListCreateView,
+    LearningRevisionDetailView,
 )
 
 urlpatterns = [
@@ -60,4 +64,27 @@ urlpatterns = [
         LearningResourceDetailView.as_view(),
         name='resource-detail'
     ),
+    # Learning Notes
+path(
+    'topics/<int:topic_id>/notes/',
+    LearningNoteListCreateView.as_view(),
+    name='note-list-create'
+),
+path(
+    'notes/<int:pk>/',
+    LearningNoteDetailView.as_view(),
+    name='note-detail'
+),
+
+# Learning Revisions
+path(
+    'milestones/<int:milestone_id>/revisions/',
+    LearningRevisionListCreateView.as_view(),
+    name='revision-list-create'
+),
+path(
+    'revisions/<int:pk>/',
+    LearningRevisionDetailView.as_view(),
+    name='revision-detail'
+),
 ]

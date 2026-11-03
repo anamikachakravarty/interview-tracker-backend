@@ -1,14 +1,18 @@
 from rest_framework import serializers
+from django.utils import timezone
 
 from .models import (
     LearningTopic,
     LearningModule,
     LearningMilestone,
-    LearningResource
+    LearningResource,
+    LearningNote,
+    LearningRevision
 )
 
 
 class LearningTopicSerializer(serializers.ModelSerializer):
+    progress_percentage = serializers.ReadOnlyField()
     class Meta:
         model = LearningTopic
         fields = '__all__'
@@ -16,6 +20,7 @@ class LearningTopicSerializer(serializers.ModelSerializer):
 
 
 class LearningModuleSerializer(serializers.ModelSerializer):
+    progress_percentage = serializers.ReadOnlyField()
     class Meta:
         model = LearningModule
         fields = '__all__'
@@ -27,7 +32,21 @@ class LearningMilestoneSerializer(serializers.ModelSerializer):
         model = LearningMilestone
         fields = '__all__'
         read_only_fields = ['id', 'module', 'created_at', 'updated_at']
+    
+    def update(self, instance, validated_data):
+        was_completed = instance.is_completed
 
+        instance = super().update(instance, validated_data)
+
+        if instance.is_completed and not was_completed:
+            instance.completed_at = timezone.now()
+            instance.save(update_fields=['completed_at'])
+
+        elif not instance.is_completed and was_completed:
+            instance.completed_at = None
+            instance.save(update_fields=['completed_at'])
+
+        return instance
 
 class LearningResourceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -47,3 +66,21 @@ class LearningResourceSerializer(serializers.ModelSerializer):
             )
 
         return attrs
+
+class LearningNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LearningNote
+        fields = '__all__'
+        read_only_fields = ['id', 'topic', 'created_at', 'updated_at']
+
+
+class LearningRevisionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LearningRevision
+        fields = '__all__'
+        read_only_fields = [
+            'id',
+            'milestone',
+            'created_at',
+            'completed_at'
+        ]
