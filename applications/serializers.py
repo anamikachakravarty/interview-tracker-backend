@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import JobApplication
+from .models import JobApplication, Interview, InterviewQuestion
 
 
 class JobApplicationSerializer(serializers.ModelSerializer):
@@ -25,4 +25,51 @@ class JobApplicationSerializer(serializers.ModelSerializer):
             'id',
             'created_at',
             'updated_at',
+        ]
+
+
+class InterviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Interview
+        fields = [
+            'id',
+            'application',
+            'round_name',
+            'interview_date',
+            'interview_time',
+            'interview_mode',
+            'interviewer',
+            'platform_location',
+            'interview_outcome',
+            'feedback',
+            'personal_notes',
+            'created_at',
+            'updated_at',
+        ]
+
+        read_only_fields = [
+            'id',
+            'application',
+            'created_at',
+            'updated_at'
+        ]
+
+
+class InterviewQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InterviewQuestion
+        fields = [
+            'id',
+            'interview',
+            'question_text',
+            'answer_text',
+            'position',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = [
+            'id',
+            'interview',
+            'created_at',
+            'updated_at'
         ]
