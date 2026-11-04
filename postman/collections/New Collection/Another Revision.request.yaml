@@ -1,0 +1,13 @@
+$kind: http-request
+url: localhost:8000/api/learning/milestones/1/revisions/
+method: GET
+body:
+  type: json
+  content: |-
+    {
+        "scheduled_date": "2026-11-17",
+        "revision_number": 5,
+        "status": "Pending",
+        "revision_notes": "Revise Python interview questions."
+    }
+order: 4000

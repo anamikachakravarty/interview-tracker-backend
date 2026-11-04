@@ -14,6 +14,7 @@ from .views import (
     LearningNoteDetailView,
     LearningRevisionListCreateView,
     LearningRevisionDetailView,
+    LearningProgressSummaryView,
 )
 
 urlpatterns = [
@@ -86,5 +87,10 @@ path(
     'revisions/<int:pk>/',
     LearningRevisionDetailView.as_view(),
     name='revision-detail'
+),
+path(
+    'progress/',
+    LearningProgressSummaryView.as_view(),
+    name='learning-progress-summary'
 ),
 ]

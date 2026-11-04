@@ -1,0 +1,4 @@
+$kind: http-request
+url: localhost:8000/api/learning/milestones/1/revisions/
+method: GET
+order: 5000

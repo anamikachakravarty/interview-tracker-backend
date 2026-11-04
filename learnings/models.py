@@ -42,46 +42,46 @@ class LearningTopic(models.Model):
     def __str__(self):
         return self.title
 
-@property
-def progress_percentage(self):
-    modules = self.modules.all()
+    @property
+    def progress_percentage(self):
+        modules = self.modules.all()
 
-    total_weight = sum(
-        (module.weight for module in modules),
-        Decimal("0")
-    )
+        total_weight = sum(
+            (module.weight for module in modules),
+            Decimal("0")
+        )
 
-    if total_weight == 0:
-        return Decimal("0.00")
+        if total_weight == 0:
+            return Decimal("0.00")
 
-    weighted_progress = sum(
-        (
-            module.weight * module.progress_percentage
-            for module in modules
-        ),
-        Decimal("0")
-    )
+        weighted_progress = sum(
+            (
+                module.weight * module.progress_percentage
+                for module in modules
+            ),
+            Decimal("0")
+        )
 
-    return (weighted_progress / total_weight).quantize(
-        Decimal("0.01")
-    )
+        return (weighted_progress / total_weight).quantize(
+            Decimal("0.01")
+        )
 
-def update_status(self):
-    milestones = LearningMilestone.objects.filter(
-        module__topic=self
-    )
+    def update_status(self):
+        milestones = LearningMilestone.objects.filter(
+            module__topic=self
+        )
 
-    total = milestones.count()
-    completed = milestones.filter(is_completed=True).count()
+        total = milestones.count()
+        completed = milestones.filter(is_completed=True).count()
 
-    if total == 0 or completed == 0:
-        self.status = self.TopicStatus.NEW
-    elif completed == total:
-        self.status = self.TopicStatus.DONE
-    else:
-        self.status = self.TopicStatus.IN_PROGRESS
+        if total == 0 or completed == 0:
+            self.status = self.TopicStatus.NEW
+        elif completed == total:
+            self.status = self.TopicStatus.DONE
+        else:
+            self.status = self.TopicStatus.IN_PROGRESS
 
-    self.save(update_fields=['status'])
+        self.save(update_fields=['status'])
 
 class LearningModule(models.Model):
 
@@ -110,30 +110,30 @@ class LearningModule(models.Model):
     def __str__(self):
         return f"{self.topic.title} - {self.title}"
 
-@property
-def progress_percentage(self):
-    milestones = self.milestones.all()
+    @property
+    def progress_percentage(self):
+        milestones = self.milestones.all()
 
-    total_weight = sum(
-        (milestone.weight for milestone in milestones),
-        Decimal("0")
-    )
+        total_weight = sum(
+            (milestone.weight for milestone in milestones),
+            Decimal("0")
+        )
 
-    if total_weight == 0:
-        return Decimal("0.00")
+        if total_weight == 0:
+            return Decimal("0.00")
 
-    completed_weight = sum(
-        (
-            milestone.weight
-            for milestone in milestones
-            if milestone.is_completed
-        ),
-        Decimal("0")
-    )
+        completed_weight = sum(
+            (
+                milestone.weight
+                for milestone in milestones
+                if milestone.is_completed
+            ),
+            Decimal("0")
+        )
 
-    return (completed_weight / total_weight * 100).quantize(
-        Decimal("0.01")
-    )    
+        return (completed_weight / total_weight * 100).quantize(
+            Decimal("0.01")
+        )  
 
 class LearningMilestone(models.Model):
 

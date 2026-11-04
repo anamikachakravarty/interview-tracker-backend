@@ -457,4 +457,35 @@ class LearningRevisionDetailView(APIView):
         revision = self.get_object(pk)
         revision.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
+class LearningProgressSummaryView(APIView):
+
+    def get(self, request):
+        topics = LearningTopic.objects.all().order_by('-created_at')
+
+        result = []
+
+        for topic in topics:
+            modules_data = []
+
+            for module in topic.modules.all().order_by('position'):
+                modules_data.append({
+                    'id': module.id,
+                    'title': module.title,
+                    'weight': module.weight,
+                    'progress_percentage': module.progress_percentage,
+                    'milestones_total': module.milestones.count(),
+                    'milestones_completed': module.milestones.filter(
+                        is_completed=True
+                    ).count()
+                })
+
+            result.append({
+                'id': topic.id,
+                'title': topic.title,
+                'status': topic.status,
+                'progress_percentage': topic.progress_percentage,
+                'modules': modules_data
+            })
+
+        return Response(result)    
